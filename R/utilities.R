@@ -24,7 +24,7 @@ capitalize_character <- function(x = NA) {
           NA
         } else {
           paste0(
-            toupper(substring(x, 1, 1)), 
+            toupper(substring(x, 1, 1)),
             substring(x, 2)
           )
         }
@@ -36,7 +36,7 @@ capitalize_character <- function(x = NA) {
 #' Export CAPL-2 data to an Excel workbook.
 #'
 #' @description
-#' This function exports CAPL-2 data to an Excel workbook on a local computer. 
+#' This function exports CAPL-2 data to an Excel workbook on a local computer.
 #'
 #' @export
 #'
@@ -71,6 +71,8 @@ export_capl_data <- function(x = NULL, file_path = NA) {
 #'
 #' @export
 #'
+#' @importFrom stringr str_count
+#'
 #' @param x A character vector representing values in 12-hour clock format.
 #'
 #' @details
@@ -88,14 +90,22 @@ get_24_hour_clock <- function(x = NA) {
       sapply(x, function(x) {
         x <- validate_character(x)
         if(grepl("am|pm", tolower(x))) {
-          x <- format(strptime(tolower(x), "%I:%M %p"), format = "%H:%M")
+          if(str_count(x, ":") > 1) {
+            x <- format(strptime(tolower(x), "%I:%M:%S %p"), format = "%H:%M")
+          } else {
+            x <- format(strptime(tolower(x), "%I:%M %p"), format = "%H:%M")
+          }
         } else if(grepl(":", tolower(x))) {
           explode <- strsplit(tolower(x), ":")
           hour <- validate_integer(explode[[1]][1])
           if(! is.na(hour) & hour <= 12) {
-            x <- format(strptime(tolower(x), "%I:%M"), format = "%H:%M")
+            if(str_count(x, ":") > 1) {
+              x <- format(strptime(tolower(x), "%I:%M:%S"), format = "%H:%M")
+            } else {
+              x <- format(strptime(tolower(x), "%I:%M"), format = "%H:%M")
+            }
           } else {
-            x <- x
+            x <- paste0(explode[[1]][1:2], collapse = ":")
           }
         } else {
           x <- NA
@@ -108,7 +118,7 @@ get_24_hour_clock <- function(x = NA) {
 #' Compute a binary score.
 #'
 #' @description
-#' This function computes a binary score (0 = incorrect answer, 1 = correct answer) for a response to a questionnaire item based on the value(s) set as 
+#' This function computes a binary score (0 = incorrect answer, 1 = correct answer) for a response to a questionnaire item based on the value(s) set as
 #' answer(s) to the item.
 #'
 #' @export
@@ -116,9 +126,9 @@ get_24_hour_clock <- function(x = NA) {
 #' @param x A character or numeric vector representing a response to a questionnaire item.
 #' @param answer A character or numeric vector representing the correct answer(s) to the questionnaire item. The answer argument does not have to match x
 #' in case for a correct answer to be computed.
-#' 
+#'
 #' @details
-#' This function is called by [get_fill_in_the_blanks_score()]. 
+#' This function is called by [get_fill_in_the_blanks_score()].
 #'
 #' @examples
 #' get_binary_score(
@@ -127,7 +137,7 @@ get_24_hour_clock <- function(x = NA) {
 #' )
 #'
 #' # [1]  0  0  1  0 NA  0
-#' 
+#'
 #' get_binary_score(
 #'   x = c("20 minutes", "30 minutes", "60 minutes or 1 hour", "120 minutes or 2 hours"),
 #'   answer = "60 minutes or 1 hour"
@@ -167,8 +177,8 @@ get_binary_score <- function(x, answer) {
 #'
 #' @export
 #'
-#' @param n A numeric (integer) vector representing the number of rows of data to generate. By default, `n` is set to 500. 
-#' 
+#' @param n A numeric (integer) vector representing the number of rows of data to generate. By default, `n` is set to 500.
+#'
 #' @examples
 #' capl_demo_data <- get_capl_demo_data(10000)
 #'
@@ -226,7 +236,7 @@ get_binary_score <- function(x, answer) {
 #' #  $ feelings_about_pa2             : int  5 3 4 4 1 2 5 2 1 3 ...
 #' #  $ feelings_about_pa3             : int  3 4 3 5 1 1 4 2 1 4 ...
 #' #  $ pa_guideline                   : int  1 3 3 1 4 1 1 4 4 2 ...
-#' #  $ crt_means: int  2 3 2 3 4 1 3 4 1 3 ...
+#' #  $ crf_means: int  2 3 2 3 4 1 3 4 1 3 ...
 #' #  $ ms_means        : int  1 1 4 2 4 4 2 1 1 3 ...
 #' #  $ sports_skill                   : int  3 1 1 4 1 3 1 1 3 2 ...
 #' #  $ pa_is                          : int  10 1 9 5 7 7 8 3 7 10 ...
@@ -295,7 +305,7 @@ get_capl_demo_data <- function(n = 500) {
           "feelings_about_pa2" = sample(c(1:5, NA), n, replace = TRUE, prob = c(rep(0.19, 5), 0.05)),
           "feelings_about_pa3" = sample(c(1:5, NA), n, replace = TRUE, prob = c(rep(0.19, 5), 0.05)),
           "pa_guideline" = sample(c(1:4, NA), n, replace = TRUE, prob = c(rep(4.210526, 4), 0.05)),
-          "crt_means" = sample(c(1:4, NA), n, replace = TRUE, prob = c(rep(4.210526, 4), 0.05)),
+          "crf_means" = sample(c(1:4, NA), n, replace = TRUE, prob = c(rep(4.210526, 4), 0.05)),
           "ms_means" = sample(c(1:4, NA), n, replace = TRUE, prob = c(rep(4.210526, 4), 0.05)),
           "sports_skill" = sample(c(1:4, NA), n, replace = TRUE, prob = c(rep(4.210526, 4), 0.05)),
           "pa_is" = sample(c(1:10), n, replace = TRUE, prob = c(0.35, rep(0.06, 5), 0.35, rep(0.06, 3))),
@@ -318,6 +328,8 @@ get_capl_demo_data <- function(n = 500) {
 #' interpretation computations will run without errors in the presence of missing variables.
 #'
 #' @export
+#'
+#' @importFrom dplyr bind_cols
 #'
 #' @param raw_data a data frame of raw CAPL-2 data.
 #'
@@ -374,7 +386,7 @@ get_capl_demo_data <- function(n = 500) {
 #' * feelings_about_pa2
 #' * feelings_about_pa3
 #' * pa_guideline
-#' * crt_means
+#' * crf_means
 #' * ms_means
 #' * sports_skill
 #' * pa_is
@@ -452,13 +464,15 @@ get_missing_capl_variables <- function(raw_data = NULL) {
         "heart_rate"
       )
       if(sum(required_variables %in% tolower(colnames(raw_data))) < length(required_variables)) {
-        new_raw_data <- data.frame(sapply(required_variables, function(x) {
-          if(! x %in% tolower(colnames(raw_data))) {
-            rep(NA, nrow(raw_data))
-          } else {
-            raw_data[x]
-          }
-        }))
+        new_raw_data <- bind_cols(
+          lapply(required_variables, function(x) {
+            if(! x %in% tolower(colnames(raw_data))) {
+              df <- data.frame(x = rep(NA, nrow(raw_data)))
+              names(df) <- x
+              return(df)
+            }
+          })
+        )
         return(
           cbind(raw_data, new_raw_data[! colnames(new_raw_data) %in% colnames(raw_data)])
         )
@@ -472,14 +486,14 @@ get_missing_capl_variables <- function(raw_data = NULL) {
 #' Import CAPL-2 data from an Excel workbook.
 #'
 #' @description
-#' This function imports CAPL-2 data from an Excel workbook on a local computer. 
+#' This function imports CAPL-2 data from an Excel workbook on a local computer.
 #'
 #' @export
 #'
 #' @importFrom readxl read_excel
 #'
-#' @param file_path A character vector representing the file path to an Excel workbook on the user's local computer 
-#' (e.g., "c:/users/user_name/desktop/file.xlsx"). The file path is not case-sensitive. 
+#' @param file_path A character vector representing the file path to an Excel workbook on the user's local computer
+#' (e.g., "c:/users/user_name/desktop/file.xlsx"). The file path is not case-sensitive.
 #' @param sheet_name An optional character vector representing the sheet to import from the Excel workbook. If this argument is not set, the first sheet in
 #' the workbook will be imported.
 #'
@@ -488,7 +502,7 @@ get_missing_capl_variables <- function(raw_data = NULL) {
 #'
 #' @examples
 #' capl_demo_data <- import_capl_data(
-#'   file_path = "c:/users/joel/desktop/capl_demo_data.xlsx", 
+#'   file_path = "c:/users/joel/desktop/capl_demo_data.xlsx",
 #'   sheet_name = "Sheet1"
 #' )
 #'
@@ -546,7 +560,7 @@ get_missing_capl_variables <- function(raw_data = NULL) {
 #' #  $ feelings_about_pa2             : num [1:500] 5 2 2 3 4 2 4 4 2 5 ...
 #' #  $ feelings_about_pa3             : num [1:500] 2 5 2 5 3 2 2 1 3 5 ...
 #' #  $ pa_guideline                   : num [1:500] 2 3 4 1 2 4 3 2 2 2 ...
-#' #  $ crt_means                      : num [1:500] 1 4 4 2 2 1 2 1 4 1 ...
+#' #  $ crf_means                      : num [1:500] 1 4 4 2 2 1 2 1 4 1 ...
 #' #  $ ms_means                       : num [1:500] 3 2 1 2 3 1 1 2 4 2 ...
 #' #  $ sports_skill                   : num [1:500] 2 4 4 1 3 1 3 1 4 3 ...
 #' #  $ pa_is                          : num [1:500] 10 1 1 1 1 1 2 1 3 1 ...
@@ -579,7 +593,7 @@ import_capl_data <- function(file_path = NA, sheet_name = NA) {
 #' Rename variables in a data frame.
 #'
 #' @description
-#' This function renames variables in a data frame. 
+#' This function renames variables in a data frame.
 #'
 #' @export
 #'
@@ -600,7 +614,7 @@ import_capl_data <- function(file_path = NA, sheet_name = NA) {
 #' # $ gender: chr  "Female" "Girl" "Girl" "f" ...
 #'
 #' capl_demo_data <- rename_variable(
-#'   x = capl_demo_data, 
+#'   x = capl_demo_data,
 #'   search = c("age", "gender"),
 #'   replace = c("hello", "world")
 #' )
@@ -611,7 +625,7 @@ import_capl_data <- function(file_path = NA, sheet_name = NA) {
 #' # $ hello: int  11 9 10 11 9 8 11 9 10 12 ...
 #' # $ world: chr  "Female" "Girl" "Girl" "f" ...
 #'
-#' @return Returns a data frame with the renamed variables (if variables in the `search` argument are successfully found and renamed). 
+#' @return Returns a data frame with the renamed variables (if variables in the `search` argument are successfully found and renamed).
 rename_variable <- function(x = NULL, search = NA, replace = NA) {
   search <- validate_character(search)
   replace <- validate_character(replace)
@@ -652,7 +666,7 @@ rename_variable <- function(x = NULL, search = NA, replace = NA) {
 #'
 #' @details
 #' If `x` contains a decimal value that is otherwise valid (e.g., 8.5, 10.1), this function will return the [floor()] of the value.
-#' 
+#'
 #' Other `capl` functions called by this function include: [validate_number()].
 #'
 #' @examples
@@ -660,7 +674,7 @@ rename_variable <- function(x = NULL, search = NA, replace = NA) {
 #'
 #' # [1] NA  8  9 10 11 12 NA NA NA 12  8
 #'
-#' @return Returns a numeric (integer) vector with a value between 8 and 12 (if valid) or NA (if not valid). 
+#' @return Returns a numeric (integer) vector with a value between 8 and 12 (if valid) or NA (if not valid).
 validate_age <- function(x) {
   return(
     unname(
@@ -688,7 +702,7 @@ validate_age <- function(x) {
 #' @examples
 #' validate_character(c("beginning", "progressing", "achieving", "excelling", "", NA, 7))
 #'
-#' # [1] "beginning"   "progressing" "achieving"   "excelling"   NA            NA 
+#' # [1] "beginning"   "progressing" "achieving"   "excelling"   NA            NA
 #' # [7] "7"
 #'
 #' @return Returns a character vector (if valid) or NA (if not valid).
@@ -794,7 +808,7 @@ validate_gender <- function(x) {
 #'
 #' @description
 #' This function checks whether a vector is an integer.
-#' 
+#'
 #' @export
 #'
 #' @param x A vector.
@@ -842,11 +856,11 @@ validate_number <- function(x) {
 #' Check whether a response to a given questionnaire item or scale is valid.
 #'
 #' @description
-#' This function checks whether a vector for a given questionnaire item or scale is valid. 
+#' This function checks whether a vector for a given questionnaire item or scale is valid.
 #'
 #' @export
 #'
-#' @param x A numeric (integer) vector representing the response to a questionnaire item (valid values are between the values set by the 
+#' @param x A numeric (integer) vector representing the response to a questionnaire item (valid values are between the values set by the
 #' `lower_bound` and `upper_bound` argumetns).
 #' @param lower_bound A numeric (integer) vector representing the value below which x is invalid.
 #' @param upper_bound A numeric (integer) vector representing the value above which x is invalid.

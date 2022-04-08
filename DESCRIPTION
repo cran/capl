@@ -1,6 +1,6 @@
 Package: capl
 Title: Compute and Visualize CAPL-2 Scores and Interpretations
-Version: 1.39
+Version: 1.42
 Authors@R: 
     c(person(given = "Joel",
              family = "Barnes",
@@ -25,11 +25,12 @@ Encoding: UTF-8
 Language: en
 LazyData: true
 RoxygenNote: 7.1.1
-Imports: dplyr, ggplot2, lubridate, magrittr, readxl, stats, writexl
+Imports: dplyr, ggplot2, lubridate, magrittr, readxl, stats, stringr,
+        writexl
 Suggests: knitr, rmarkdown
 NeedsCompilation: no
-Packaged: 2021-03-13 18:58:11 UTC; joelb
+Packaged: 2022-03-26 03:18:59 UTC; joelb
 Author: Joel Barnes [aut, cre] (<https://orcid.org/0000-0002-7621-9020>),
   Michelle Guerrero [aut] (<https://orcid.org/0000-0001-8169-5040>)
 Repository: CRAN
-Date/Publication: 2021-03-16 08:40:02 UTC
+Date/Publication: 2022-04-08 02:52:39 UTC
